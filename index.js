@@ -16,16 +16,16 @@ const GameBoard = () => {
 		console.table(boardArr);
 	};
 
-	let getArr = () => {
+	let getBoardArr = () => {
 		return boardArr;
 	};
 
 	let getPiece = (coords) => {
-		return boardArr[coords.x][coords.y];
+		return boardArr[coords.y][coords.x];
 	};
 
 	let isAvailable = (coords) => {
-		return boardArr[coords.x][coords.y] === "";
+		return boardArr[coords.y][coords.x] === "";
 	};
 
 	let isInBound = (coords) => {
@@ -45,19 +45,52 @@ const GameBoard = () => {
 
 		if (!isInBound(coords)) {
 			console.log("ERROR: OUT OF BOUNDS");
-			return;
+			return false;
 		}
 
-		if (!isAvailable(coords)) return;
+		if (!isAvailable(coords)) {
+			alert("Spot taken");
+			return false;
+		}
 
-		boardArr[coords.x][coords.y] = token;
+		boardArr[coords.y][coords.x] = token;
 		logBoard();
+		return true;
 	};
 
-	return { getArr, getPiece, place };
+	return { getBoardArr, getPiece, place };
 };
 
 const Player = (name, token) => {
 	let getName = () => name;
 	let getToken = () => token;
+
+	return { getName, getToken };
+};
+
+const GameController = (players) => {
+	const board = GameBoard();
+
+	let currPlayer = players[0];
+
+	let checkWin = () => {};
+	let switchPlayer = () => {
+		if (currPlayer === players[0]) {
+			currPlayer = players[1];
+		} else {
+			currPlayer = players[0];
+		}
+	};
+
+	let getCurrPlayer = () => currPlayer;
+	let getBoardArr = board.getBoardArr;
+
+	let play = (coords) => {
+		if (board.place(coords, currPlayer.getToken())) {
+			checkWin();
+			switchPlayer();
+		}
+	};
+
+	return { play, getCurrPlayer, getBoardArr };
 };
