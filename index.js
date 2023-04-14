@@ -1,5 +1,3 @@
-// alert("hello world");
-
 const GameBoard = () => {
 	//PROPERTIES DEFINITIONS
 	let boardSize = 3;
@@ -59,4 +57,7 @@ const GameBoard = () => {
 	return { getArr, getPiece, place };
 };
 
-const board = GameBoard().place({ x: 0, y: 0 }, "x");
+const Player = (name, token) => {
+	let getName = () => name;
+	let getToken = () => token;
+};
