@@ -1,6 +1,128 @@
+@import url("https://fonts.googleapis.com/css2?family=Caveat&family=Lato&family=Short+Stack&family=Tillana:wght@500&display=swap");
+/*
+font-family: 'Caveat', cursive;
+font-family: 'Lato', sans-serif;
+font-family: 'Short Stack', cursive;
+font-family: 'Tillana', cursive;
+
+*/
+
+:root {
+	--font-header: "Short Stack", cursive;
+	--font-ui: "Tillana", cursive;
+	--font-info: "Lato", sans-serif;
+
+	--color-main-text: black;
+	--color-ui-shadow: #727070;
+}
+
 * {
 	box-sizing: border-box;
 	padding: 0;
 	margin: 0;
 	border: 0;
+
+	color: black;
+}
+
+html,
+body {
+	width: 100%;
+	height: 100%;
+}
+
+body {
+	background-color: rgb(180, 154, 154);
+	padding: 0 20%;
+}
+
+header > h1 {
+	font-size: 4.5rem;
+	font-family: var(--font-header);
+}
+
+.page-container {
+	width: 100%;
+	height: 100%;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+main {
+	flex: 1;
+	align-self: stretch;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.menu {
+	height: 50%;
+	width: 50%;
+
+	font-family: var(--font-ui);
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-around;
+
+	padding: 12px 24px;
+
+	box-shadow: 0 5px 10px 2px var(--color-ui-shadow);
+}
+
+.ui-container {
+	background-image: url(assets/paperContainer.png);
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+
+	border: 3px solid var(--color-main-text);
+	border-bottom-left-radius: 25px 255px;
+	border-bottom-right-radius: 225px 25px;
+	border-top-left-radius: 255px 25px;
+	border-top-right-radius: 25px 225px;
+}
+
+.menu > h2 {
+	font-size: 2rem;
+}
+
+.game-rules {
+	text-align: left;
+}
+
+.menu > button {
+	font-size: 1.2rem;
+	font-weight: bold;
+	font-family: inherit;
+
+	padding: 8px;
+	background-color: transparent;
+
+	width: 50%;
+	height: auto;
+
+	box-shadow: 0 5px 5px var(--color-ui-shadow);
+
+	transition: transform 0.3s;
+}
+
+button:hover {
+	transform: scale(1.1);
+	opacity: 70%;
+}
+
+button:active {
+	transform: scale(0.9);
+	opacity: 30%;
+	transition: 50ms;
+}
+
+footer {
+	padding: 12px 0;
 }
