@@ -38,7 +38,7 @@ const GameBoard = () => {
 		);
 	};
 
-	// PUBLIC FUNCTIONS
+	/****PUBLIC FUNCTIONS****/
 
 	//DOES THE NECESSARY CHECKS AND PLACES THE GIVEN TOKEN AT THE GIVEN COORDS IN THE BOARD
 	//RETURNS TRUE IF PLACED FALSE OTHERWISE
@@ -89,10 +89,35 @@ const GameBoard = () => {
 };
 
 const Player = (name, token) => {
+	//GETTERS
 	let getName = () => name;
 	let getToken = () => token;
 
+	//PLAYER OBJECT
 	return { getName, getToken };
+};
+
+const Computer = (token) => {
+	//OBJECT TO INHERIT
+	let obj = Player("Computer", token);
+
+	//USES THE GIVEN BOARDSTATE TO CREATE A RANDOM MOVE
+	let getMove = (boardState) => {
+		let computerMove;
+
+		//CREATE MOVE AND CHECK IF THE SPACE IS AVAILABLE
+		do {
+			computerMove = {
+				x: Math.floor(Math.random() * boardState.length),
+				y: Math.floor(Math.random() * boardState.length),
+			};
+		} while (boardState[computerMove.y][computerMove.x]);
+
+		return computerMove;
+	};
+
+	//COMPUTER OBJECT
+	return Object.assign({}, obj, { getMove });
 };
 
 const GameController = (players) => {
