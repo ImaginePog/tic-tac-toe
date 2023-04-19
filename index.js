@@ -1,5 +1,5 @@
 const GameBoard = () => {
-	/****DEFINITIONS ON START***/
+	/****DEFINITIONS ON FACTORY START****/
 	let boardSize = 3;
 	let boardArr = [];
 
@@ -7,13 +7,13 @@ const GameBoard = () => {
 
 	//CREATES THE TTT 3X3 BOARD
 	let createBoard = () => {
-	for (let i = 0; i < boardSize; ++i) {
-		let rowArr = [];
-		for (let j = 0; j < boardSize; ++j) {
-			rowArr.push("");
+		for (let i = 0; i < boardSize; ++i) {
+			let rowArr = [];
+			for (let j = 0; j < boardSize; ++j) {
+				rowArr.push("");
+			}
+			boardArr.push(rowArr);
 		}
-		boardArr.push(rowArr);
-	}
 	};
 
 	//LOGS THE BOARD AS A 2D TABLE IN THE CONSOLE
@@ -121,7 +121,7 @@ const Computer = (token) => {
 };
 
 const GameController = (players) => {
-	/****DEFINITIONS ON START****/
+	/****DEFINITIONS ON FACTORY START****/
 
 	//CREATE BOARD
 	const board = GameBoard();
@@ -300,6 +300,7 @@ const GameController = (players) => {
 		reset,
 	};
 };
+
 const Game = (gameState) => {
 	//CREATE COMPUTER IF THE GAMESTATE IS SINGLEPLAYER
 	if (gameState.name === "singleplayer") {
@@ -337,8 +338,374 @@ const Game = (gameState) => {
 		reset: controller.reset,
 	};
 };
+
+const DisplayController = (() => {
+	/****DEFINITIONS ON FACTORY START****/
+	let game;
+	let result = {};
+	let gameState = {};
+
+	/****DOM ELEMENTS****/
+	const main = document.querySelector("main");
+	let menuContainer;
+
+	/****CONTROL FUNCTIONS****/
+	let clearMenu = () => {
+		//Remove everything
+		main.textContent = "";
+	};
+
+	//RETURNS TRUE IF TOKEN IS SELECTED
+	//FALSE OTHERWISE
+	let checkToken = () => {
+		const selected = document.querySelector(".selected-btn");
+		return selected;
+	};
+
+	//UPDATES THE DISPLAY WITH THE LATEST STATE OF THE GAMEBOARD AND THE GAME INFO
+	let updateDisplay = () => {
+		const displayContainer = document.createElement("section");
+		displayContainer.classList.add("display", "paper", "main-border");
+
+		const infoContainer = document.createElement("div");
+		infoContainer.classList.add("info-container");
+
+		const players = game.getPlayers();
+		players.forEach((player) => {
+			const playerContainer = document.createElement("div");
+			playerContainer.classList.add("player-container");
+
+			const playerName = document.createElement("p");
+			playerName.classList.add("player-name");
+			playerName.textContent = player.getName();
+
+			const playerToken = document.createElement("p");
+			playerToken.classList.add("token-container");
+			playerToken.textContent = player.getToken();
+
+			if (player.getToken() === game.getCurrPlayer().getToken()) {
+				playerName.classList.add("current-player");
+				playerToken.classList.add("current-player");
+			}
+
+			playerContainer.append(playerName, playerToken);
+			infoContainer.appendChild(playerContainer);
+		});
+
+		main.textContent = "";
+
+		const board = game.getBoardArr();
+		const boardContainer = document.createElement("div");
+		boardContainer.classList.add("board");
+
+		for (let i = 0; i < board.length; ++i) {
+			let row = board[i];
+			const rowDisplay = document.createElement("div");
+			rowDisplay.classList.add("row");
+
+			for (let j = 0; j < row.length; ++j) {
+				const square = document.createElement("button");
+				square.classList.add("square");
+
+				if (i == 0) {
+					square.classList.add("top-cell");
+				} else if (i == board.length - 1) {
+					square.classList.add("bottom-cell");
+				}
+
+				if (j == 0) {
+					square.classList.add("left-cell");
+				} else if (j == board.length - 1) {
+					square.classList.add("right-cell");
+				}
+
+				square.dataset.row = i;
+				square.dataset.column = j;
+
+				square.textContent = board[i][j];
+				if (!result.won) square.addEventListener("click", move);
+				else {
+					for (let k = 0; k < result.winCoords.length; ++k) {
+						if (i === result.winCoords[k].y && j === result.winCoords[k].x) {
+							square.classList.add("win-cell");
+						}
+					}
+				}
+
+				rowDisplay.appendChild(square);
+			}
+			boardContainer.appendChild(rowDisplay);
+		}
+
+		displayContainer.append(infoContainer, boardContainer);
+
+		main.appendChild(displayContainer);
+
+		if (result.won || result.draw) {
+			displayContainer.classList.add("dim");
+
+			const resultContainer = document.createElement("div");
+			resultContainer.classList.add("result-container", "main-border");
+
+			const bg = document.createElement("img");
+			bg.src = "assets/paperContainer.png";
+			bg.classList.add("yellow-paper");
+
+			const resultText = document.createElement("p");
+			resultText.classList.add("result-text");
+
+			if (result.won) {
+				let winner = game.getCurrPlayer().getName();
+				resultText.textContent = `WINNER: ${winner}`;
+			} else {
+				resultText.textContent = "ITS A TIE! GG";
+			}
+
+			const restartBtn = document.createElement("button");
+			restartBtn.textContent = "Restart";
+			restartBtn.classList.add("ui-border", "ui-btn");
+			restartBtn.addEventListener("click", handleRestart);
+
+			const menuBtn = document.createElement("button");
+			menuBtn.textContent = "Menu";
+			menuBtn.classList.add("ui-border", "ui-btn");
+			menuBtn.addEventListener("click", goMenu);
+
+			resultContainer.append(bg, resultText, restartBtn, menuBtn);
+
+			main.appendChild(resultContainer);
 		}
 	};
 
-	return { play, getCurrPlayer, getBoardArr };
-};
+	/****EVENT HANDLERS****/
+
+	//GETS THE CHOSEN GAMESTATE AND CREATES SECONDARY MENU BASED ON IT
+	let handleGameBtn = (e) => {
+		gameState.name = e.currentTarget.dataset.gameState;
+
+		clearMenu();
+		createSecondaryMenu();
+	};
+
+	//SELECTS THE TOKEN BTN FOR PLAYERS
+	let handleTokenBtn = (e) => {
+		//remove the selected btns
+		const tokenBtns = document.querySelectorAll(".token-btn");
+		tokenBtns.forEach((btn) => {
+			btn.classList.remove("selected-btn");
+		});
+
+		const clickedBtn = e.currentTarget;
+		clickedBtn.classList.add("selected-btn");
+
+		const token = clickedBtn.dataset.token;
+
+		const playerId = clickedBtn.closest(".player-info").dataset.playerId;
+
+		let otherToken;
+		if (token == "x") otherToken = "o";
+		else otherToken = "x";
+
+		const otherBtns = menuContainer.querySelectorAll(
+			`.token-btn[data-token="${otherToken}"]`
+		);
+
+		otherBtns.forEach((btn) => {
+			if (playerId != btn.closest(".player-info").dataset.playerId) {
+				btn.classList.add("selected-btn");
+			}
+		});
+	};
+
+	//STARTS THE GAME BASED ON THE SECONDARY MENU INPUTS AND THE GAMESTATE
+	let handleStart = (e) => {
+		e.preventDefault();
+
+		if (checkToken()) {
+			const form = e.currentTarget;
+			const fields = form.querySelectorAll(".player-info");
+
+			gameState.players = [];
+			fields.forEach((field) => {
+				let name = field.querySelector("input").value;
+				let token = field.querySelector(".selected-btn").dataset.token;
+
+				gameState.players.push(Player(name, token));
+			});
+
+			game = Game(gameState);
+			menuContainer.classList.add("hide"); //remove instead of hide later
+			updateDisplay();
+		} else {
+			alert("Please select a token :)");
+		}
+	};
+
+	//RESTARTS THE GAME
+	let handleRestart = () => {
+		//clear result
+		result = {};
+		//clear game
+		game.reset();
+
+		updateDisplay();
+	};
+
+	//CLOSES THE GAME AND RETURNS BACK TO THE MAIN MENU
+	let goMenu = () => {
+		handleRestart();
+		main.textContent = "";
+		createMainMenu();
+	};
+
+	//GETS THE COORDS OF THE CELL IN THE DOM BOARD AND PLAYS A ROUND WITH THE COORDS
+	let move = (e) => {
+		let clickedCoords = {
+			x: e.currentTarget.dataset.column,
+			y: e.currentTarget.dataset.row,
+		};
+
+		result = game.play(clickedCoords);
+
+		updateDisplay();
+	};
+
+	/****DOM CREATORS****/
+	let createMenuContainer = () => {
+		menuContainer = document.createElement("section");
+		menuContainer.classList.add("menu-container", "main-border");
+
+		//CREATE BACKGROUND
+		const bg = document.createElement("img");
+		bg.src = "assets/paperContainer.png";
+		bg.classList.add("yellow-paper");
+
+		menuContainer.appendChild(bg);
+	};
+
+	//CREATES SECONDARY MENU BASED ON THE GAME STATE
+	//INPUTS THE PLAYER NAMES AND PIECES
+	let createSecondaryMenu = () => {
+		createMenuContainer();
+		//predefined rules
+		const gameRules = {
+			multiplayer:
+				"Play against another player, enter your names and select a unique piece.",
+			singleplayer:
+				"Play against the computer, enter your name and select the piece you want to play with.",
+		};
+
+		let playerCount;
+		if (gameState.name === "multiplayer") {
+			playerCount = 2;
+		} else {
+			playerCount = 1;
+		}
+
+		const tokenCount = 2;
+
+		const title = document.createElement("h2");
+
+		//capitalize
+		title.textContent =
+			gameState.name.charAt(0).toUpperCase() + gameState.name.slice(1);
+
+		const menu = document.createElement("form");
+		menu.classList = "menu";
+
+		menu.appendChild(title);
+
+		for (let i = 0; i < playerCount; ++i) {
+			const playerInfo = document.createElement("div");
+			playerInfo.classList.add("player-info");
+			playerInfo.dataset.playerId = i;
+
+			const field = document.createElement("fieldset");
+			field.classList.add("player-name");
+
+			const label = document.createElement("label");
+			label.setAttribute("for", "first-player");
+			label.textContent = `Player ${i + 1}:`;
+
+			const input = document.createElement("input");
+			input.setAttribute("type", "text");
+			input.setAttribute("id", "first-player");
+			input.classList.add("ui-border", "ui-input");
+			input.required = true;
+			input.setAttribute("maxlength", 10);
+
+			field.append(label, input);
+			playerInfo.appendChild(field);
+
+			for (let i = 0; i < tokenCount; ++i) {
+				const tokenBtn = document.createElement("button");
+				tokenBtn.setAttribute("type", "button");
+				tokenBtn.classList.add("token-btn", "ui-border", "ui-btn");
+				if (i == 0) {
+					tokenBtn.textContent = tokenBtn.dataset.token = "x";
+				} else {
+					tokenBtn.textContent = tokenBtn.dataset.token = "o";
+				}
+
+				tokenBtn.addEventListener("click", handleTokenBtn);
+
+				playerInfo.appendChild(tokenBtn);
+			}
+
+			menu.appendChild(playerInfo);
+		}
+
+		const startBtn = document.createElement("button");
+		startBtn.classList.add("start-btn", "ui-border", "ui-btn");
+		startBtn.textContent = "Start";
+
+		const rule = document.createElement("p");
+		rule.classList.add("game-rule");
+		rule.textContent = gameRules[gameState.name];
+
+		menu.append(startBtn, rule);
+
+		menu.addEventListener("submit", handleStart);
+
+		menuContainer.appendChild(menu);
+
+		main.appendChild(menuContainer);
+	};
+
+	//CREATES THE MAIN MENU THAT CONTAINS THE GAME STATE BUTTONS
+	let createMainMenu = () => {
+		createMenuContainer();
+
+		const mainMenu = document.createElement("div");
+		mainMenu.classList.add("main-menu", "menu");
+
+		const title = document.createElement("h2");
+		title.textContent = "Choose a mode";
+
+		const multiplayerBtn = document.createElement("button");
+		multiplayerBtn.classList.add("game-btn", "ui-border", "ui-btn");
+		multiplayerBtn.dataset.gameState = "multiplayer";
+		multiplayerBtn.textContent = "Player vs Player";
+		multiplayerBtn.addEventListener("click", handleGameBtn);
+
+		const singleplayerBtn = document.createElement("button");
+		singleplayerBtn.classList.add("game-btn", "ui-border", "ui-btn");
+		singleplayerBtn.dataset.gameState = "singleplayer";
+		singleplayerBtn.textContent = "Player vs Computer";
+		singleplayerBtn.addEventListener("click", handleGameBtn);
+
+		const rules = document.createElement("p");
+		rules.classList.add("game-rule");
+		rules.textContent =
+			"Click on the empty spots to make your move on a 3x3 grid. A player has one turn to click. " +
+			"First player to place 3 consecutive pieces diagonally, horizontally or vertically wins.";
+
+		mainMenu.append(title, multiplayerBtn, singleplayerBtn, rules);
+		menuContainer.appendChild(mainMenu);
+
+		main.appendChild(menuContainer);
+	};
+
+	//CREATE MENU ON START
+	createMainMenu();
+})();
