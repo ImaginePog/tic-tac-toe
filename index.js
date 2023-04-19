@@ -121,11 +121,125 @@ const Computer = (token) => {
 };
 
 const GameController = (players) => {
-	const board = GameBoard();
+	/****DEFINITIONS ON START****/
 
+	//CREATE BOARD
+	const board = GameBoard();
 	let currPlayer = players[0];
 
-	let checkWin = () => {};
+	//STATE OBJECT FOR DISPLAYING WIN OR TIE AND WIN INFORMATION
+	let state = {};
+
+	//THE COORDS OF TOKEN THAT TRIGGERED WIN CONDITION TO RETURN FOR DISPLAY
+	let winCoords = [];
+
+	/****PRIVATE FUNCTIONS****/
+
+	//LOOP THROUGH THE ROWS TO CHECK FOR WIN IN THE GIVEN BOARD FOR THE GIVEN TOKEN
+	let checkHorizontal = (boardState, token) => {
+		for (let i = 0; i < boardState.length; ++i) {
+			let count = 0;
+			for (let j = 0; j < boardState[i].length; ++j) {
+				if (boardState[i][j] === token) {
+					++count;
+					winCoords.push({ x: j, y: i });
+				}
+				if (count >= 3) {
+					return true;
+				}
+			}
+			winCoords.length = 0;
+		}
+
+		return false;
+	};
+
+	//LOOP THROUGH THE COLUMNS TO CHECK FOR WIN IN THE GIVEN BOARD FOR THE GIVEN TOKEN
+	let checkVertical = (boardState, token) => {
+		for (let i = 0; i < boardState.length; ++i) {
+			let count = 0;
+			for (let j = 0; j < boardState.length; ++j) {
+				if (boardState[j][i] === token) {
+					++count;
+					winCoords.push({ x: i, y: j });
+				}
+
+				if (count >= 3) {
+					return true;
+				}
+			}
+			winCoords.length = 0;
+		}
+
+		return false;
+	};
+
+	//LOOP THROUGH THE BOARD AND CHECK IF THE MAIN DIAGONAL CELLS HAVE THE SAME 3 TOKEN
+	let checkMainDiagonal = (boardState, token) => {
+		let count = 0;
+		for (let i = 0; i < boardState.length; ++i) {
+			for (let j = 0; j < boardState.length; ++j) {
+				//main diagonal spots
+				if (i === j) {
+					if (boardState[i][j] === token) {
+						++count;
+						winCoords.push({ x: j, y: i });
+					}
+				}
+
+				if (count >= 3) {
+					return true;
+				}
+			}
+		}
+
+		winCoords.length = 0;
+		return false;
+	};
+
+	//LOOP THROUGH THE BOARD AND CHECK IF THE ANTI DIAGONAL CELLS HAVE THE SAME 3 TOKEN
+	let checkAntiDiagonal = (boardState, token) => {
+		let count = 0;
+		for (let i = 0; i < boardState.length; ++i) {
+			for (let j = 0; j < boardState.length; ++j) {
+				if (i + j == boardState.length - 1) {
+					//anti daigonal spots
+					if (boardState[i][j] === token) {
+						++count;
+						winCoords.push({ x: j, y: i });
+					}
+				}
+
+				if (count >= 3) {
+					return true;
+				}
+			}
+		}
+		winCoords.length = 0;
+		return false;
+	};
+
+	//RETURNS TRUE IF EITHER OF THE DIAGONALS TRIGGER THE WIN CONDITION
+	let checkDiagonals = (boardState, token) => {
+		return (
+			checkMainDiagonal(boardState, token) ||
+			checkAntiDiagonal(boardState, token)
+		);
+	};
+
+	//CHECK ALL THE WIN CONDITIONS FOR THE CURRENT TOKEN AND BOARD STATE
+	let checkWin = () => {
+		let boardState = board.getBoardArr();
+		let token = currPlayer.getToken();
+
+		return (
+			checkHorizontal(boardState, token) ||
+			checkVertical(boardState, token) ||
+			checkDiagonals(boardState, token)
+		);
+	};
+
+	//SWITCH THE CURRENT PLAYER
 	let switchPlayer = () => {
 		if (currPlayer === players[0]) {
 			currPlayer = players[1];
@@ -134,13 +248,58 @@ const GameController = (players) => {
 		}
 	};
 
-	let getCurrPlayer = () => currPlayer;
-	let getBoardArr = board.getBoardArr;
+	//HANDLE "AFTERMATH" AFTER A MOVE IS PLAYED
+	//CHECK IF THERE WAS A WIN OR A DRAW AND UPDATE THE STATE OBJECT
+	//SWITCH PLAYER IF ABLE TO
+	let changeTurn = () => {
+		if (state.placed) {
+			state.won = checkWin();
+			state.draw = board.isFull();
+			if (state.won) {
+				state.winCoords = winCoords;
+			}
 
+			if (!state.won && !state.draw) {
+				switchPlayer();
+			}
+		}
+
+		return state;
+	};
+
+	/****PUBLIC FUNCTIONS****/
+
+	//RETURN THE CURRENT PLAYER
+	let getCurrPlayer = () => currPlayer;
+
+	//RETURN ALL THE PLAYERS IN THE GAME
+	let getPlayers = () => {
+		return players;
+	};
+
+	//PLACE THE GIVEN COORDS IN THE BOARD AND UPDATE STATE
 	let play = (coords) => {
-		if (board.place(coords, currPlayer.getToken())) {
-			checkWin();
-			switchPlayer();
+		state.placed = board.place(coords, currPlayer.getToken());
+
+		return changeTurn();
+	};
+
+	//RESET THE GAME STATE AND THE BOARD TO THE INITIAL CONDITION
+	let reset = () => {
+		state = {};
+		currPlayer = players[0];
+		board.reset();
+	};
+
+	//GAMECONTROLLER OBJECT
+	return {
+		play,
+		getCurrPlayer,
+		getPlayers,
+		getBoardArr: board.getBoardArr,
+		reset,
+	};
+};
 		}
 	};
 
