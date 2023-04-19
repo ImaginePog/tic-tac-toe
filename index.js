@@ -633,6 +633,7 @@ const DisplayController = (() => {
 			input.classList.add("ui-border", "ui-input");
 			input.required = true;
 			input.setAttribute("maxlength", 10);
+			input.setAttribute("autocomplete", "off");
 
 			field.append(label, input);
 			playerInfo.appendChild(field);
