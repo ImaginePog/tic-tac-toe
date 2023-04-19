@@ -300,6 +300,43 @@ const GameController = (players) => {
 		reset,
 	};
 };
+const Game = (gameState) => {
+	//CREATE COMPUTER IF THE GAMESTATE IS SINGLEPLAYER
+	if (gameState.name === "singleplayer") {
+		let compToken;
+		if (gameState.players[0].getToken() === "x") compToken = "o";
+		else compToken = "x";
+
+		const computer = Computer(compToken);
+		gameState.players.push(computer);
+	}
+
+	//CREATE CONTROLLER WITH THE PLAYERS BASED ON THE GAMESTATE
+	const controller = GameController(gameState.players);
+
+	//HANDLE PLAY BASED ON THE GAMESTATE
+	let play = (coords) => {
+		let state = controller.play(coords);
+
+		if (gameState.name === "singleplayer") {
+			if (!state.won && !state.draw && state.placed) {
+				let computer = gameState.players[1];
+				state = controller.play(computer.getMove(controller.getBoardArr()));
+			}
+		}
+
+		return state;
+	};
+
+	//GAME OBJECT
+	return {
+		play,
+		getPlayers: controller.getPlayers,
+		getBoardArr: controller.getBoardArr,
+		getCurrPlayer: controller.getCurrPlayer,
+		reset: controller.reset,
+	};
+};
 		}
 	};
 
