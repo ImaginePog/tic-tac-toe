@@ -1,18 +1,14 @@
-@import url("https://fonts.googleapis.com/css2?family=Caveat&family=Lato&family=Short+Stack&family=Tillana:wght@500&display=swap");
-/*
-font-family: 'Caveat', cursive;
-font-family: 'Lato', sans-serif;
-font-family: 'Short Stack', cursive;
-font-family: 'Tillana', cursive;
-
-*/
+@import url("https://fonts.googleapis.com/css2?family=Caveat&family=Lato&family=Short+Stack&family=Indie+Flower&display=swap");
 
 :root {
 	--font-header: "Short Stack", cursive;
-	--font-ui: "Tillana", cursive;
+	--font-ui: "Indie Flower", cursive;
 	--font-info: "Lato", sans-serif;
 
-	--color-main-text: black;
+	--font-pieces: "Caveat", cursive;
+
+	--color-text-main: black;
+	--color-text-selected: red;
 	--color-ui-shadow: #727070;
 }
 
@@ -22,7 +18,7 @@ font-family: 'Tillana', cursive;
 	margin: 0;
 	border: 0;
 
-	color: black;
+	color: var(--color-text-main);
 }
 
 html,
@@ -33,7 +29,25 @@ body {
 
 body {
 	background-color: rgb(180, 154, 154);
+}
+
+.page-container {
+	width: 100%;
+	height: 100%;
+
 	padding: 0 20%;
+
+	display: flex;
+	flex-direction: column;
+}
+
+header,
+footer {
+	display: flex;
+	justify-content: center;
+
+	font-family: var(--font-info);
+	font-size: 0.7rem;
 }
 
 header > h1 {
@@ -41,88 +55,339 @@ header > h1 {
 	font-family: var(--font-header);
 }
 
-.page-container {
-	width: 100%;
-	height: 100%;
-
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}
-
 main {
 	flex: 1;
-	align-self: stretch;
 
 	display: flex;
 	align-items: center;
 	justify-content: center;
+
+	position: relative;
 }
 
-.menu {
-	height: 50%;
-	width: 50%;
+.main-border {
+	border: solid black 3px;
+	border-top-left-radius: 250px 15px;
+	border-top-right-radius: 105px 15px;
+	border-bottom-left-radius: 10px 115px;
+	border-bottom-right-radius: 105px 15px;
 
-	font-family: var(--font-ui);
-
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: space-around;
-
-	padding: 12px 24px;
-
-	box-shadow: 0 5px 10px 2px var(--color-ui-shadow);
+	box-shadow: 0 5px 5px var(--color-ui-shadow);
 }
 
-.ui-container {
+.paper {
 	background-image: url(assets/paperContainer.png);
 	background-position: center;
 	background-size: cover;
 	background-repeat: no-repeat;
+}
 
-	border: 3px solid var(--color-main-text);
+.ui-border {
+	border: 3px solid var(--color-text-main);
 	border-bottom-left-radius: 25px 255px;
 	border-bottom-right-radius: 225px 25px;
 	border-top-left-radius: 255px 25px;
 	border-top-right-radius: 25px 225px;
+
+	box-shadow: 0 5px 5px var(--color-ui-shadow);
 }
 
-.menu > h2 {
-	font-size: 2rem;
+.menu-container {
+	width: 60%;
+	height: max-content;
+
+	display: flex;
+	justify-content: center;
+
+	font-family: var(--font-ui);
+
+	padding: 24px;
+
+	box-shadow: 0 5px 10px 2px var(--color-ui-shadow);
+
+	overflow: hidden;
+	position: relative;
 }
 
-.game-rules {
+.menu-container * {
+	z-index: 5;
+	background-color: transparent;
+	font-family: var(--font-ui);
+}
+
+.yellow-paper {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+
+	filter: invert(0%) sepia(7%) saturate(1968%) hue-rotate(354deg)
+		brightness(100%) contrast(104%);
+}
+
+.menu > h2,
+.result-text {
+	font-size: 3rem;
+}
+
+.game-rule {
 	text-align: left;
 }
 
-.menu > button {
-	font-size: 1.2rem;
+/* MENU BUTTONS */
+.ui-btn {
+	font-size: 1.4rem;
 	font-weight: bold;
-	font-family: inherit;
+	font-family: var(--font-ui);
 
 	padding: 8px;
 	background-color: transparent;
 
-	width: 50%;
+	width: 40%;
 	height: auto;
-
-	box-shadow: 0 5px 5px var(--color-ui-shadow);
 
 	transition: transform 0.3s;
 }
 
-button:hover {
+.ui-btn:hover {
 	transform: scale(1.1);
 	opacity: 70%;
 }
 
-button:active {
+.ui-btn:active {
 	transform: scale(0.9);
 	opacity: 30%;
 	transition: 50ms;
 }
 
+/* MENU INPUT FIELD */
+
+.player-info {
+	font-size: 1.2rem;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: flex-end;
+
+	gap: 24px;
+}
+
+.player-info > .token-btn {
+	width: 50px;
+	height: auto;
+}
+
+.player-name {
+	display: flex;
+	flex-direction: column;
+
+	font-family: var(--font-ui);
+	text-transform: capitalize;
+
+	gap: 6px;
+}
+
+.ui-input {
+	padding: 8px 5px;
+
+	font-size: inherit;
+	line-height: 2rem;
+
+	font-family: var(--font-ui);
+	text-align: center;
+}
+
+.ui-input:focus {
+	outline: none;
+}
+
 footer {
 	padding: 12px 0;
+
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+}
+
+.credit {
+	font-size: 0.6rem;
+}
+
+.credit a {
+	color: white;
+}
+
+.credit a:hover {
+	color: red;
+}
+
+.creator-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 6px;
+}
+
+.github-container {
+	width: 1.2rem;
+	height: 1.2rem;
+
+	display: block;
+}
+
+.github-container:hover {
+	opacity: 60%;
+}
+
+.github-container > img {
+	width: 100%;
+	height: 100%;
+}
+
+/* DYNAMIC */
+
+.selected-btn {
+	border-color: var(--color-text-selected);
+	color: var(--color-text-selected);
+}
+
+.display {
+	flex: 1;
+	align-self: stretch;
+
+	display: flex;
+	flex-direction: column;
+
+	gap: 24px;
+
+	padding: 2% 20%;
+}
+
+.info-container {
+	font-size: 2.5rem;
+
+	display: flex;
+	justify-content: space-between;
+}
+
+.player-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.token-container {
+	font-family: var(--font-pieces);
+	font-size: 5rem;
+	line-height: 1rem;
+}
+
+.current-player {
+	color: var(--color-text-selected);
+}
+
+.board {
+	flex: 1;
+	align-self: stretch;
+
+	display: flex;
+	flex-direction: column;
+}
+
+.row {
+	flex: 1;
+
+	display: flex;
+}
+
+.square {
+	flex: 1;
+
+	display: flex;
+
+	border: 2px solid #6666fd;
+
+	background: transparent;
+
+	align-items: center;
+	justify-content: center;
+
+	font-family: var(--font-pieces);
+
+	font-size: 8rem;
+	line-height: 1rem;
+	color: #6666fd;
+}
+
+.left-cell {
+	border-left: none;
+}
+
+.right-cell {
+	border-right: none;
+}
+
+.top-cell {
+	border-top: none;
+}
+
+.bottom-cell {
+	border-bottom: none;
+}
+
+.draw-cell {
+	color: yellow;
+}
+
+.win-cell {
+	color: green;
+}
+
+.menu {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 48px;
+}
+
+.result-container {
+	position: absolute;
+
+	top: 0;
+
+	height: 50%;
+	width: 50%;
+
+	z-index: 5;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+
+	overflow: hidden;
+
+	gap: 24px;
+}
+
+.result-container img {
+	opacity: 60%;
+}
+
+.result-container * {
+	z-index: 10;
+}
+
+.dim {
+	filter: brightness(50%);
+}
+
+.result-text {
+	font-family: var(--font-ui);
+	text-align: center;
 }
