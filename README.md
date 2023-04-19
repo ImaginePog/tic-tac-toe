@@ -8,7 +8,7 @@ Against a computer, the computer currently only makes random but legal moves.
 
 # Multiplayer
 
-Play against one another player with unique tokens.
+Play against another player with unique tokens.
 
 # Credits
 
